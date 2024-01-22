@@ -8,15 +8,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
-      with:
-        node-version: 14
 
     - name: Install dependencies
       run: |
@@ -26,21 +28,10 @@ jobs:
       run: |
         npm run build
 
-    - name: Deploy to AWS S3
-      uses: jakejarvis/s3-sync-action@master
+    - name: Deploy
+      uses: lbertenasco/s3-deploy@v1
       with:
-        aws-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        src: dist/
-        dest: s3://magdielgv.com
-        args: --acl public-read --follow-symlinks --delete
-
-    - name: Invalidate CloudFront cache
-      if: success()
-      uses: aws-actions/cloudfront-invalidate-action@v2
-      with:
-        cloudfront-distribution-id: E1OUANT3HKWKNO
-        paths: '/*'
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        folder: build
+        bucket: ${{ secrets.AWS_S3_BUCKET }}
+        dist-id: ${{ secrets.DISTRIBUTION_ID }}
+        invalidation: / *
