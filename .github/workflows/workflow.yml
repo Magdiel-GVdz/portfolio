@@ -8,16 +8,25 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
-    - name: Deploy To AWS
-      uses: aasmal97/deploy-react-app-to-aws
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
-        aws_region: us-east-1
-        aws_access_key_id: ${{ secrets.access_key_id }}
-        aws_secret_access_key: ${{ secrets.secret_key }}
-        cloudfront_distribution_id: ${{ secrets.distribution_id }}
-        bucket_name: ${{ secrets.bucket_name }}
-        react_app_secrets: ${{toJson(secrets)}}
-        node_verison: 20
-        path_to_app: ./dist
+        node-version: 18
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy
+      uses: reggionick/s3-deploy@v4
+      with:
+        folder: dist
+        bucket: ${{ secrets.AWS_S3_BUCKET }}
+        bucket-region: ${{ secrets.AWS_REGION }}
+        dist-id: ${{ secrets.DISTRIBUTION_ID }}
+        invalidation: /
