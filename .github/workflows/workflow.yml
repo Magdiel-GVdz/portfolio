@@ -26,4 +26,7 @@ jobs:
       run: npm run build
 
     - name: Deploy
-      run: s3-deploy './dist/**' --cwd './dist/' --region AWS_REGION --bucket AWS_S3_BUCKET --distId DISTRIBUTION_ID --invalidate '/*'
+      uses: ItsKarma/aws-cli@v1.70.0
+      with:
+        args: s3-deploy './dist/**' --cwd './dist/' --region AWS_REGION --bucket AWS_S3_BUCKET --distId DISTRIBUTION_ID --invalidate '/*'
+     
