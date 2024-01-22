@@ -10,27 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Build App
-      run: npm run build
-
-    - name: S3/CloudFront Deploy
-      uses: staevs/s3-deploy-action@latest
-      if: success()
+    - name: Deploy To AWS
+      uses: aasmal97/deploy-react-app-to-aws
       with:
-        args: --follow-symlinks --delete --no-progress
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.DISTRIBUTION_ID }}
-        S3_SOURCE_DIR: 'dist'
+        aws_region: us-east-1
+        aws_access_key_id: ${{ secrets.access_key_id }}
+        aws_secret_access_key: ${{ secrets.secret_key }}
+        cloudfront_distribution_id: ${{ secrets.distribution_id }}
+        bucket_name: ${{ secrets.bucket_name }}
+        react_app_secrets: ${{toJson(secrets)}}
+        node_verison: 20
+        path_to_app: ./dist
